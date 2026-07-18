@@ -1,348 +1,60 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>İlaç Takvimi</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Pillbox">
+  <title>Pillbox</title>
+  
+  <link rel="icon" type="image/jpeg" href="icon.jpg">
+  <link rel="apple-touch-icon" href="icon.jpg">
 
-<!-- İkon Etiketleri -->
-<!-- Desktop Chrome ve diğer tarayıcılar için %100 çalışan gömülü SVG Emoji İkonu -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💊</text></svg>">
-
-<!-- iOS (Apple) için güvenilir, engelleme yapmayan açık kaynak CDN üzerinden yüksek çözünürlüklü ikon -->
-<link rel="apple-touch-icon" sizes="180x180" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f48a.png">
-
-<style>
-  :root {
-    --bg: #F2F4F6; --card: #FFFFFF; --ink: #20242C; --line: #EEF0F2;
-    --sabah: #D98A3D; --ogle: #2F8FB0; --aksam: #C85C6B; --gece: #5C5A8C;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); padding-bottom: 64px; }
-  .wrap { max-width: 440px; margin: 0 auto; padding: 32px 20px 0; }
-  .kicker { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: .5; margin-bottom: 4px; }
-  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 30px; font-weight: 600; margin-bottom: 12px; }
-  .progress-row { display: flex; justify-content: space-between; font-size: 13px; opacity: .7; margin-bottom: 6px; }
-  .bar { width: 100%; height: 6px; border-radius: 99px; background: #DCE1E6; margin-bottom: 20px; }
-  .bar > div { height: 6px; border-radius: 99px; background: var(--gece); transition: width .3s; }
-  .week-label { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
-  .grid-card { background: var(--card); border-radius: 16px; overflow-x: auto; margin-bottom: 24px; }
-  .grid { display: grid; grid-template-columns: 58px repeat(7, 1fr); gap: 4px; padding: 12px; min-width: 620px; }
-  .day-head { text-align: center; border-radius: 8px; padding: 4px 0; }
-  .day-head .wd { font-size: 10px; opacity: .4; }
-  .day-head .dn { font-size: 12px; opacity: .6; }
-  .day-head.today { background: #EFEDF7; }
-  .day-head.today .dn { opacity: 1; font-weight: 600; color: var(--gece); }
-  .period-label { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 0; font-size: 9px; font-weight: 600; text-transform: uppercase; }
-  .cell { display: flex; flex-direction: column; gap: 4px; padding: 6px 2px; border-radius: 8px; }
-  .cell.today { background: #FAFAFC; }
-  .cell .empty { text-align: center; font-size: 12px; opacity: .2; }
-  .pill { font-size: 10px; line-height: 1.25; border-radius: 6px; padding: 4px; text-align: left; border: none; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: inherit; color: var(--ink); }
-  .banner { font-size: 13px; padding: 8px 12px; border-radius: 10px; margin-bottom: 16px; background: #EFEDF7; color: #4A4870; display: none; }
-  .add-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; border-radius: 16px; font-size: 14px; font-weight: 500; color: var(--gece); background: var(--card); border: 1.5px dashed #C9CCD6; cursor: pointer; margin-bottom: 24px; font-family: inherit; }
-  .form-card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 24px; display: none; }
-  .form-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
-  .form-head button { background: none; border: none; font-size: 18px; cursor: pointer; color: #8A8F99; }
-  input[type="text"] { width: 100%; margin-bottom: 10px; padding: 10px 12px; border-radius: 12px; font-size: 14px; border: none; outline: none; background: var(--bg); font-family: inherit; color: var(--ink); }
-  .form-label { font-size: 12px; font-weight: 500; opacity: .6; margin-bottom: 6px; }
-  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-  .chip { border: none; border-radius: 99px; padding: 7px 11px; font-size: 12px; font-weight: 500; cursor: pointer; background: var(--bg); color: var(--ink); font-family: inherit; }
-  .day-row { display: flex; gap: 4px; margin-bottom: 8px; }
-  .day-chip { flex: 1; border: none; border-radius: 8px; padding: 9px 0; font-size: 11px; font-weight: 500; cursor: pointer; background: var(--bg); color: var(--ink); font-family: inherit; }
-  .day-chip.on { background: var(--gece); color: #fff; }
-  .quick-row { display: flex; gap: 6px; margin-bottom: 16px; }
-  .quick { border: none; border-radius: 99px; padding: 5px 9px; font-size: 11px; opacity: .6; cursor: pointer; background: var(--bg); color: var(--ink); font-family: inherit; }
-  .submit { width: 100%; padding: 11px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #fff; background: var(--gece); border: none; cursor: pointer; font-family: inherit; }
-  .submit:disabled { opacity: .4; }
-  .list-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: .5; margin-bottom: 8px; }
-  .med-list { background: var(--card); border-radius: 16px; }
-  .med-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-  .med-item:last-child { border-bottom: none; }
-  .med-item .nm { font-size: 14px; font-weight: 500; }
-  .med-item .meta { font-size: 12px; opacity: .5; margin-top: 2px; }
-  .del { background: none; border: none; cursor: pointer; font-size: 15px; color: #B0B4BA; padding: 4px; }
-</style>
+  <style>
+    body { background: #F2F4F6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: -apple-system, sans-serif; }
+    .loader { text-align: center; color: #8A8F99; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
+    .spinner { margin: 0 auto 12px; width: 24px; height: 24px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #5C5A8C; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <p class="kicker">Haftalık Program</p>
-  <h1>İlaç Takvimi</h1>
-  <div class="progress-row"><span>Bugün</span><span id="progress-text">0/0 tamamlandı</span></div>
-  <div class="bar"><div id="progress-fill" style="width:0%"></div></div>
-  <div class="banner" id="banner"></div>
-  <div class="week-label" id="week-label"></div>
-  <div class="grid-card"><div class="grid" id="grid"></div></div>
-  <button class="add-btn" id="show-form">＋ Yeni İlaç Ekle</button>
-  <button class="add-btn" id="show-import" style="margin-top:-16px;">⇩ Toplu İçe Aktar (JSON yapıştır)</button>
-  <div class="form-card" id="import-card">
-    <div class="form-head"><span>Toplu İçe Aktar</span><button id="close-import">✕</button></div>
-    <p class="form-label" style="margin-bottom:8px;">Aşağıya ilaç listesi JSON'unu yapıştır, sonra İçe Aktar'a bas.</p>
-    <textarea id="import-text" rows="6" style="width:100%;padding:10px 12px;border-radius:12px;border:none;outline:none;background:var(--bg);font-family:monospace;font-size:12px;margin-bottom:10px;resize:vertical;"></textarea>
-    <button class="submit" id="import-submit">İçe Aktar</button>
+
+  <div id="loading-view" class="loader">
+    <div class="spinner"></div>
+    Fetching Pillbox...
   </div>
-  <div class="form-card" id="form-card">
-    <div class="form-head"><span>Yeni İlaç</span><button id="close-form">✕</button></div>
-    <input type="text" id="f-name" placeholder="İlaç adı">
-    <input type="text" id="f-dosage" placeholder="Doz / not (opsiyonel)">
-    <p class="form-label">Ne zaman? (birden fazla seçilebilir)</p>
-    <div class="chip-row" id="period-chips"></div>
-    <p class="form-label">Hangi günler?</p>
-    <div class="day-row" id="day-chips"></div>
-    <div class="quick-row">
-      <button class="quick" data-q="all">Her gün</button>
-      <button class="quick" data-q="wk">Hafta içi</button>
-      <button class="quick" data-q="we">Hafta sonu</button>
-      <button class="quick" data-q="none">Temizle</button>
-    </div>
-    <button class="submit" id="submit">Ekle</button>
-  </div>
-  <p class="list-title">İlaçlarım</p>
-  <div class="med-list" id="med-list"></div>
-</div>
 
-<script>
-const PERIODS = {
-  sabah: { label: 'Sabah', color: '#D98A3D', icon: '🌅' },
-  ogle:  { label: 'Öğle',  color: '#2F8FB0', icon: '☀️' },
-  aksam: { label: 'Akşam', color: '#C85C6B', icon: '🌇' },
-  gece:  { label: 'Gece',  color: '#5C5A8C', icon: '🌙' },
-};
-const PERIOD_ORDER = ['sabah', 'ogle', 'aksam', 'gece'];
-const WEEKDAYS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  <div id="app-root"></div>
 
-const DEFAULT_MEDS = [];
+  <script>
+    // PASTE YOUR APPS SCRIPT WEB APP URL HERE
+    const API_URL = 'https://script.google.com/macros/s/AKfycby2jQVlWap-bfTgj0Kuj_0n_1CyGfg7wJKuLAs9OckQerIro-ZLBkQbJwdkrV5loe8jjg/exec';
 
-let meds = [];
-let logs = {};
-let formPeriods = [];
-let formDays = [...WEEKDAYS];
-
-function loadState() {
-  try {
-    const m = localStorage.getItem('ilac_meds');
-    if (m === null) { meds = DEFAULT_MEDS; saveMeds(); }
-    else meds = JSON.parse(m);
-  } catch (e) { meds = DEFAULT_MEDS; showBanner('Depolama kullanılamıyor: ' + e.message, true); }
-  try { logs = JSON.parse(localStorage.getItem('ilac_logs') || '{}'); } catch (e) { logs = {}; }
-}
-function saveMeds() {
-  try { localStorage.setItem('ilac_meds', JSON.stringify(meds)); }
-  catch (e) { showBanner('Kaydedilemedi: ' + e.message, true); }
-}
-function saveLogs() {
-  try { localStorage.setItem('ilac_logs', JSON.stringify(logs)); }
-  catch (e) { showBanner('Kaydedilemedi: ' + e.message, true); }
-}
-function showBanner(msg, isError) {
-  const b = document.getElementById('banner');
-  b.textContent = msg; b.style.display = 'block';
-  b.style.background = isError ? '#FBE9EB' : '#EFEDF7';
-  b.style.color = isError ? '#C85C6B' : '#4A4870';
-  setTimeout(() => { b.style.display = 'none'; }, 6000);
-}
-
-const pad = n => String(n).padStart(2, '0');
-const toDateStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate()+n); return r; };
-const wdOf = d => WEEKDAYS[(d.getDay()+6)%7];
-
-function hexA(hex, a) { return hex + a; }
-
-function render() {
-  const today = toDateStr(new Date());
-  const dates = Array.from({length: 7}, (_, i) => addDays(new Date(), i));
-  document.getElementById('week-label').textContent =
-    `${dates[0].getDate()} ${dates[0].toLocaleDateString('tr-TR',{month:'short'})} – ${dates[6].getDate()} ${dates[6].toLocaleDateString('tr-TR',{month:'short'})} · Önümüzdeki 7 gün`;
-
-  // progress
-  const todayWd = wdOf(new Date());
-  const todayMeds = meds.filter(m => m.days.includes(todayWd));
-  const slots = todayMeds.reduce((a, m) => a + m.periods.length, 0);
-  const done = todayMeds.reduce((a, m) => a + m.periods.filter(p => (logs[today]||{})[`${m.id}:${p}`]).length, 0);
-  document.getElementById('progress-text').textContent = `${done}/${slots} tamamlandı`;
-  document.getElementById('progress-fill').style.width = slots ? (done/slots*100)+'%' : '0%';
-
-  // grid
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  grid.appendChild(document.createElement('div'));
-  dates.forEach(d => {
-    const ds = toDateStr(d);
-    const el = document.createElement('div');
-    el.className = 'day-head' + (ds === today ? ' today' : '');
-    el.innerHTML = `<div class="wd">${d.toLocaleDateString('tr-TR',{weekday:'short'})}</div><div class="dn">${d.getDate()}</div>`;
-    grid.appendChild(el);
-  });
-  PERIOD_ORDER.forEach(pk => {
-    const P = PERIODS[pk];
-    const lab = document.createElement('div');
-    lab.className = 'period-label';
-    lab.style.color = P.color;
-    lab.innerHTML = `<span>${P.icon}</span><span>${P.label}</span>`;
-    grid.appendChild(lab);
-    dates.forEach(d => {
-      const ds = toDateStr(d);
-      const cell = document.createElement('div');
-      cell.className = 'cell' + (ds === today ? ' today' : '');
-      const cellMeds = meds.filter(m => m.periods.includes(pk) && m.days.includes(wdOf(d)));
-      if (!cellMeds.length) cell.innerHTML = '<span class="empty">–</span>';
-      cellMeds.forEach(m => {
-        const key = `${m.id}:${pk}`;
-        const checked = !!(logs[ds]||{})[key];
-        const btn = document.createElement('button');
-        btn.className = 'pill';
-        btn.textContent = m.name;
-        btn.title = m.name + (m.dosage ? ' — ' + m.dosage : '');
-        btn.style.background = checked ? P.color : hexA(P.color, '1A');
-        btn.style.color = checked ? '#fff' : 'var(--ink)';
-        btn.onclick = () => {
-          logs[ds] = logs[ds] || {};
-          logs[ds][key] = !logs[ds][key];
-          saveLogs(); render();
-        };
-        cell.appendChild(btn);
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(payload => {
+        document.getElementById('loading-view').style.display = 'none';
+        
+        // Inject CSS
+        const style = document.createElement('style');
+        style.textContent = payload.css;
+        document.head.appendChild(style);
+        
+        // Inject HTML
+        document.getElementById('app-root').innerHTML = payload.html;
+        
+        // Inject and execute JS / Data
+        const script = document.createElement('script');
+        script.textContent = `
+          const appData = ${payload.data};
+          ${payload.js}
+        `;
+        document.body.appendChild(script);
+      })
+      .catch(err => {
+        document.getElementById('loading-view').innerHTML = "Failed to load data.<br>" + err;
       });
-      grid.appendChild(cell);
-    });
-  });
-
-  // med list
-  const list = document.getElementById('med-list');
-  list.innerHTML = '';
-  meds.forEach(m => {
-    const row = document.createElement('div');
-    row.className = 'med-item';
-    const info = document.createElement('div');
-    info.innerHTML = `<div class="nm">${m.name}${m.dosage ? ' · ' + m.dosage : ''}</div>
-      <div class="meta">${m.periods.map(p => PERIODS[p].label).join(', ')} — ${m.days.length === 7 ? 'Her gün' : m.days.join(', ')}</div>`;
-    const del = document.createElement('button');
-    del.className = 'del'; del.textContent = '🗑';
-    del.onclick = () => {
-      if (confirm(`"${m.name}" silinsin mi?`)) { meds = meds.filter(x => x.id !== m.id); saveMeds(); render(); }
-    };
-    row.appendChild(info); row.appendChild(del);
-    list.appendChild(row);
-  });
-}
-
-function renderForm() {
-  const pc = document.getElementById('period-chips');
-  pc.innerHTML = '';
-  PERIOD_ORDER.forEach(pk => {
-    const P = PERIODS[pk];
-    const on = formPeriods.includes(pk);
-    const b = document.createElement('button');
-    b.className = 'chip'; b.type = 'button';
-    b.textContent = `${P.icon} ${P.label}`;
-    b.style.background = on ? P.color : '';
-    b.style.color = on ? '#fff' : '';
-    b.onclick = () => {
-      formPeriods = on ? formPeriods.filter(x => x !== pk) : [...formPeriods, pk];
-      renderForm();
-    };
-    pc.appendChild(b);
-  });
-  const dc = document.getElementById('day-chips');
-  dc.innerHTML = '';
-  WEEKDAYS.forEach(d => {
-    const b = document.createElement('button');
-    b.className = 'day-chip' + (formDays.includes(d) ? ' on' : '');
-    b.type = 'button'; b.textContent = d;
-    b.onclick = () => {
-      formDays = formDays.includes(d) ? formDays.filter(x => x !== d) : [...formDays, d];
-      renderForm();
-    };
-    dc.appendChild(b);
-  });
-  document.getElementById('submit').disabled =
-    !document.getElementById('f-name').value.trim() || !formPeriods.length || !formDays.length;
-}
-
-document.getElementById('show-form').onclick = () => {
-  document.getElementById('form-card').style.display = 'block';
-  document.getElementById('show-form').style.display = 'none';
-  document.getElementById('show-import').style.display = 'none';
-};
-document.getElementById('close-form').onclick = () => {
-  document.getElementById('form-card').style.display = 'none';
-  document.getElementById('show-form').style.display = 'flex';
-  document.getElementById('show-import').style.display = 'flex';
-};
-document.getElementById('show-import').onclick = () => {
-  document.getElementById('import-card').style.display = 'block';
-  document.getElementById('show-form').style.display = 'none';
-  document.getElementById('show-import').style.display = 'none';
-};
-document.getElementById('close-import').onclick = () => {
-  document.getElementById('import-card').style.display = 'none';
-  document.getElementById('show-form').style.display = 'flex';
-  document.getElementById('show-import').style.display = 'flex';
-};
-document.getElementById('import-submit').onclick = () => {
-  const raw = document.getElementById('import-text').value.trim();
-  if (!raw) return;
-  let arr;
-  try { arr = JSON.parse(raw); } catch (e) { showBanner('Geçersiz JSON: ' + e.message, true); return; }
-  if (!Array.isArray(arr)) { showBanner('JSON bir liste ([...]) olmalı.', true); return; }
-  let added = 0;
-  arr.forEach((item, i) => {
-    if (!item || typeof item.name !== 'string' || !item.name.trim()) return;
-    const periods = Array.isArray(item.periods) ? item.periods.filter(p => PERIODS[p]) : [];
-    const days = Array.isArray(item.days) ? item.days.filter(d => WEEKDAYS.includes(d)) : [];
-    if (!periods.length || !days.length) return;
-    meds.push({
-      id: 'm' + Date.now() + '_' + i,
-      name: item.name.trim(),
-      dosage: typeof item.dosage === 'string' ? item.dosage.trim() : '',
-      periods, days,
-    });
-    added++;
-  });
-  if (added === 0) { showBanner('Hiçbir geçerli ilaç bulunamadı, formatı kontrol et.', true); return; }
-  saveMeds();
-  document.getElementById('import-text').value = '';
-  document.getElementById('import-card').style.display = 'none';
-  document.getElementById('show-form').style.display = 'flex';
-  document.getElementById('show-import').style.display = 'flex';
-  showBanner(`${added} ilaç eklendi.`);
-  render();
-};
-
-document.getElementById('f-name').oninput = renderForm;
-
-document.querySelectorAll('.quick').forEach(q => {
-  q.onclick = () => {
-    const t = q.dataset.q;
-    formDays = t === 'all' ? [...WEEKDAYS] : t === 'wk' ? WEEKDAYS.slice(0,5) : t === 'we' ? WEEKDAYS.slice(5) : [];
-    renderForm();
-  };
-});
-
-document.getElementById('submit').onclick = () => {
-  const name = document.getElementById('f-name').value.trim();
-  if (!name || !formPeriods.length || !formDays.length) return;
-  meds.push({
-    id: 'm' + Date.now(),
-    name,
-    dosage: document.getElementById('f-dosage').value.trim(),
-    periods: [...formPeriods],
-    days: [...formDays],
-  });
-  saveMeds();
-  document.getElementById('f-name').value = '';
-  document.getElementById('f-dosage').value = '';
-  formPeriods = []; formDays = [...WEEKDAYS];
-  document.getElementById('form-card').style.display = 'none';
-  document.getElementById('show-form').style.display = 'flex';
-  renderForm(); render();
-};
-
-// Uygulamayı Başlat
-loadState();
-renderForm();
-render();
-</script>
+  </script>
 </body>
 </html>
