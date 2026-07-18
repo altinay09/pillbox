@@ -7,10 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>İlaç Takvimi</title>
 
-<!-- İkon Etiketleri (GitHub Pages'te iOS sorunu çözebilir) -->
-<!-- Standart Favicon -->
+<!-- İkon Etiketleri -->
 <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/color/32/medicines.png">
-<!-- iOS Ana Ekrana Ekle İkonu (180x180 yüksek çözünürlük) -->
 <link rel="apple-touch-icon" sizes="180x180" href="https://img.icons8.com/color/180/medicines.png">
 
 <style>
@@ -308,8 +306,40 @@ document.getElementById('import-submit').onclick = () => {
   showBanner(`${added} ilaç eklendi.`);
   render();
 };
+
 document.getElementById('f-name').oninput = renderForm;
+
 document.querySelectorAll('.quick').forEach(q => {
   q.onclick = () => {
     const t = q.dataset.q;
-    formDays = t === 'all' ? [...WEEKDAYS] : t === 'wk'
+    formDays = t === 'all' ? [...WEEKDAYS] : t === 'wk' ? WEEKDAYS.slice(0,5) : t === 'we' ? WEEKDAYS.slice(5) : [];
+    renderForm();
+  };
+});
+
+document.getElementById('submit').onclick = () => {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name || !formPeriods.length || !formDays.length) return;
+  meds.push({
+    id: 'm' + Date.now(),
+    name,
+    dosage: document.getElementById('f-dosage').value.trim(),
+    periods: [...formPeriods],
+    days: [...formDays],
+  });
+  saveMeds();
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-dosage').value = '';
+  formPeriods = []; formDays = [...WEEKDAYS];
+  document.getElementById('form-card').style.display = 'none';
+  document.getElementById('show-form').style.display = 'flex';
+  renderForm(); render();
+};
+
+// Uygulamayı Başlat
+loadState();
+renderForm();
+render();
+</script>
+</body>
+</html>
