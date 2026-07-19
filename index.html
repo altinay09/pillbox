@@ -1,60 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Pillbox">
-  <title>Pillbox</title>
-  
-  <link rel="icon" type="image/jpeg" href="icon.jpg">
-  <link rel="apple-touch-icon" href="icon.jpg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nexus</title>
 
-  <style>
-    body { background: #F2F4F6; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: -apple-system, sans-serif; }
-    .loader { text-align: center; color: #8A8F99; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
-    .spinner { margin: 0 auto 12px; width: 24px; height: 24px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #5C5A8C; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nexus">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#1c1917">
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:#1c1917;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .card{
+    text-align:center;
+    padding:40px 32px;
+  }
+  .icon{
+    width:72px;height:72px;
+    border-radius:18px;
+    margin:0 auto 20px;
+    display:block;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+  }
+  h1{
+    font-size:22px;font-weight:700;
+    color:#f5f5f4;letter-spacing:-.3px;
+    margin-bottom:6px;
+  }
+  p{
+    font-size:13px;color:#78716c;
+    margin-bottom:28px;
+  }
+  a.btn{
+    display:inline-block;
+    background:#10b981;color:#fff;
+    text-decoration:none;
+    font-size:15px;font-weight:600;
+    padding:13px 28px;
+    border-radius:12px;
+    letter-spacing:-.1px;
+    transition:opacity .15s;
+  }
+  a.btn:active{opacity:.8;}
+</style>
 </head>
 <body>
 
-  <div id="loading-view" class="loader">
-    <div class="spinner"></div>
-    Fetching Pillbox...
-  </div>
+<div class="card">
+  <img class="icon" src="icon.png" alt="Nexus">
+  <h1>Nexus</h1>
+  <p>Kişisel dashboard</p>
+  <a class="btn" href="https://script.google.com/macros/s/AKfycby2jQVlWap-bfTgj0Kuj_0n_1CyGfg7wJKuLAs9OckQerIro-ZLBkQbJwdkrV5loe8jjg/exec" target="_top">
+    Aç →
+  </a>
+</div>
 
-  <div id="app-root"></div>
-
-  <script>
-    // PASTE YOUR APPS SCRIPT WEB APP URL HERE
-    const API_URL = 'https://script.google.com/macros/s/AKfycby2jQVlWap-bfTgj0Kuj_0n_1CyGfg7wJKuLAs9OckQerIro-ZLBkQbJwdkrV5loe8jjg/exec';
-
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(payload => {
-        document.getElementById('loading-view').style.display = 'none';
-        
-        // Inject CSS
-        const style = document.createElement('style');
-        style.textContent = payload.css;
-        document.head.appendChild(style);
-        
-        // Inject HTML
-        document.getElementById('app-root').innerHTML = payload.html;
-        
-        // Inject and execute JS / Data
-        const script = document.createElement('script');
-        script.textContent = `
-          const appData = ${payload.data};
-          ${payload.js}
-        `;
-        document.body.appendChild(script);
-      })
-      .catch(err => {
-        document.getElementById('loading-view').innerHTML = "Failed to load data.<br>" + err;
-      });
-  </script>
 </body>
 </html>
